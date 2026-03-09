@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Côte d'Ivoire 🇨🇮</title>
+<meta name="theme-color" content="#FF6B00">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#FF6B00,#FFD700,#009A44);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:15px}
+.container{width:100%;max-width:480px}
+.screen{display:none;animation:fadeIn 0.3s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card{background:white;border-radius:24px;padding:25px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+h1{font-family:'Bebas Neue',sans-serif;font-size:3.5em;text-align:center;background:linear-gradient(135deg,#FF6B00,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px;line-height:1}
+.flag{font-size:4em;text-align:center;display:block;margin:15px 0}
+.subtitle{text-align:center;color:#666;font-size:0.9em;margin-bottom:20px}
+.level-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:15px 0}
+.level-btn{padding:15px 10px;border:none;border-radius:16px;cursor:pointer;font-family:'Poppins',sans-serif;font-weight:700;font-size:0.85em;transition:transform 0.15s}
+.level-btn:active{transform:scale(0.95)}
+.level-facile{background:linear-gradient(135deg,#00C851,#00E676);color:white}
+.level-moyen{background:linear-gradient(135deg,#FF6B00,#FFA500);color:white}
+.level-difficile{background:linear-gradient(135deg,#c62828,#e53935);color:white}
+.level-icon{font-size:1.8em;display:block;margin-bottom:5px}
+.header-quiz{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.badge-level{padding:5px 14px;border-radius:20px;font-size:0.78em;font-weight:700;color:white}
+.progress-bar{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin-bottom:15px}
+.progress-fill{height:100%;border-radius:4px;transition:width 0.4s ease;background:linear-gradient(90deg,#FF6B00,#FFD700)}
+.chrono{font-size:1.4em;font-weight:900;color:#FF6B00;min-width:45px;text-align:right}
+.chrono.danger{color:#c62828;animation:pulse 0.5s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.question-num{color:#aaa;font-size:0.8em;font-weight:600}
+.question-text{font-size:1.05em;font-weight:700;color:#222;margin:15px 0;line-height:1.5;min-height:60px}
+.vf-badge{display:inline-block;background:linear-gradient(135deg,#9C27B0,#E91E63);color:white;padding:3px 10px;border-radius:10px;font-size:0.72em;font-weight:700;margin-bottom:8px}
+.options{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.option-btn{padding:13px 16px;border:2.5px solid #e0e0e0;border-radius:14px;background:white;cursor:pointer;font-family:'Poppins',sans-serif;font-size:0.9em;font-weight:600;text-align:left;transition:all 0.15s;color:#333}
+.option-btn:active{transform:scale(0.98)}
+.option-btn.correct{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-color:#4caf50;color:#2d5a1b}
+.option-btn.wrong{background:linear-gradient(135deg,#ffebee,#ffcdd2);border-color:#e53935;color:#c62828}
+.option-btn.reveal{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-color:#4caf50;color:#2d5a1b}
+.option-btn:disabled{cursor:default}
+.vf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}
+.vf-btn{padding:20px;border:2.5px solid #e0e0e0;border-radius:16px;background:white;cursor:pointer;font-family:'Poppins',sans-serif;font-size:1.3em;font-weight:900;text-align:center;transition:all 0.15s}
+.vf-btn.correct{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-color:#4caf50}
+.vf-btn.wrong{background:linear-gradient(135deg,#ffebee,#ffcdd2);border-color:#e53935}
+.feedback{padding:12px;border-radius:12px;margin-top:12px;font-size:0.88em;font-weight:600;display:none;line-height:1.5}
+.feedback.show{display:block}
+.feedback.correct{background:#e8f5e9;color:#2d5a1b;border:1px solid #4caf50}
+.feedback.wrong{background:#ffebee;color:#c62828;border:1px solid #e53935}
+.next-btn{background:linear-gradient(135deg,#FF6B00,#FFD700);color:white;border:none;padding:14px;border-radius:14px;width:100%;margin-top:12px;font-family:'Poppins',sans-serif;font-size:1em;font-weight:700;cursor:pointer;display:none;transition:transform 0.1s}
+.next-btn.show{display:block}
+.next-btn:active{transform:scale(0.97)}
+.score-card{text-align:center;padding:10px 0}
+.score-emoji{font-size:4em;margin-bottom:10px}
+.score-num{font-family:'Bebas Neue',sans-serif;font-size:4em;background:linear-gradient(135deg,#FF6B00,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.score-label{color:#666;font-size:0.9em;margin-bottom:20px}
+.score-details{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:15px 0}
+.score-detail{background:#f8f8f8;border-radius:12px;padding:12px;text-align:center}
+.score-detail .num{font-family:'Bebas Neue',sans-serif;font-size:1.8em;color:#FF6B00}
+.score-detail .lbl{font-size:0.7em;color:#888;font-weight:600}
+.btn{background:linear-gradient(135deg,#FF6B00,#FFD700);color:white;border:none;padding:14px;border-radius:14px;width:100%;margin-top:10px;font-family:'Poppins',sans-serif;font-size:1em;font-weight:700;cursor:pointer;transition:transform 0.1s}
+.btn:active{transform:scale(0.97)}
+.btn-green{background:linear-gradient(135deg,#128C7E,#25D366)}
+.btn-purple{background:linear-gradient(135deg,#6a1b9a,#ab47bc)}
+.btn-outline{background:white;color:#FF6B00;border:2.5px solid #FF6B00}
+.btn-blue{background:linear-gradient(135deg,#1565c0,#1976d2)}
+.classement-item{display:flex;align-items:center;padding:10px;border-bottom:1px solid #f0f0f0;gap:10px}
+.classement-rank{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#FF6B00,#FFD700);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.85em;flex-shrink:0}
+.classement-nom{flex:1;font-weight:600;font-size:0.9em}
+.classement-score{color:#FF6B00;font-weight:700;font-size:0.9em;text-align:right}
+.tab-bar{display:flex;gap:10px;margin-bottom:15px}
+.tab{flex:1;padding:10px;border:none;border-radius:12px;background:#f0f0f0;cursor:pointer;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.82em;transition:all 0.15s}
+.tab.active{background:linear-gradient(135deg,#FF6B00,#FFD700);color:white}
+.input-name{width:100%;padding:12px;border:2.5px solid #e0e0e0;border-radius:12px;font-family:'Poppins',sans-serif;font-size:1em;margin:6px 0;box-sizing:border-box}
+.input-name:focus{border-color:#FF6B00;outline:none}
+.streak{display:inline-block;background:linear-gradient(135deg,#FF6B00,#FFD700);color:white;padding:3px 12px;border-radius:20px;font-size:0.78em;font-weight:700;margin-left:8px}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:15px 0}
+.mode-btn{padding:18px 10px;border:2.5px solid #e0e0e0;border-radius:16px;background:white;cursor:pointer;font-family:'Poppins',sans-serif;font-weight:700;font-size:0.85em;text-align:center;transition:all 0.15s}
+.mode-btn:active{transform:scale(0.95)}
+.mode-btn.selected{border-color:#FF6B00;background:#fff3e0}
+.joueur-tour{text-align:center;padding:15px;background:linear-gradient(135deg,#FF6B00,#FFD700);border-radius:16px;color:white;margin-bottom:15px}
+.joueur-tour h3{font-family:'Bebas Neue',sans-serif;font-size:1.8em;letter-spacing:2px}
+.vs-card{display:flex;gap:10px;margin:15px 0}
+.vs-player{flex:1;padding:15px;border-radius:14px;text-align:center;border:2px solid #e0e0e0}
+.vs-player.active{border-color:#FF6B00;background:#fff3e0}
+.vs-player .pname{font-weight:700;font-size:0.85em;color:#333}
+.vs-player .pscore{font-family:'Bebas Neue',sans-serif;font-size:2.5em;color:#FF6B00}
+.confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden}
+.confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall linear forwards}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.sound-toggle{background:none;border:2px solid #e0e0e0;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1em;display:flex;align-items:center;justify-content:center;float:right;margin-bottom:10px}
+.answer-anim{animation:answerPop 0.3s ease}
+@keyframes answerPop{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ACCUEIL -->
+<div class="screen active" id="screen-accueil">
+  <div class="card">
+    <button class="sound-toggle" id="sound-btn" onclick="toggleSound()" title="Son">🔊</button>
+    <span class="flag">🇨🇮</span>
+    <h1>Quiz CI</h1>
+    <p class="subtitle">Testez vos connaissances sur la Côte d'Ivoire !</p>
+    <p style="color:#666;font-size:0.85em;font-weight:600;margin-bottom:5px">Mode de jeu :</p>
+    <div class="mode-grid">
+      <div class="mode-btn selected" id="mode-solo" onclick="choisirMode('solo')"><div style="font-size:1.8em">👤</div>Solo</div>
+      <div class="mode-btn" id="mode-duo" onclick="choisirMode('duo')"><div style="font-size:1.8em">👥</div>2 Joueurs</div>
+    </div>
+    <div id="noms-solo">
+      <input class="input-name" id="player-name" placeholder="Votre prénom..." maxlength="20">
+    </div>
+    <div id="noms-duo" style="display:none">
+      <input class="input-name" id="player1-name" placeholder="👤 Joueur 1..." maxlength="20">
+      <input class="input-name" id="player2-name" placeholder="👤 Joueur 2..." maxlength="20">
+    </div>
+    <p style="color:#666;font-size:0.85em;font-weight:600;margin:12px 0 8px">Niveau :</p>
+    <div class="level-grid">
+      <button class="level-btn level-facile" onclick="demarrer('facile')"><span class="level-icon">😊</span>Facile</button>
+      <button class="level-btn level-moyen" onclick="demarrer('moyen')"><span class="level-icon">🤔</span>Moyen</button>
+      <button class="level-btn level-difficile" onclick="demarrer('difficile')"><span class="level-icon">🔥</span>Difficile</button>
+    </div>
+    <button class="btn btn-outline" onclick="showScreen('screen-classement')" style="margin-top:10px">🏆 Classement</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="screen-quiz">
+  <div id="joueur-tour-banner" class="joueur-tour" style="display:none">
+    <h3 id="joueur-tour-nom">Joueur 1</h3>
+    <p style="font-size:0.82em;opacity:0.9">C'est ton tour !</p>
+  </div>
+  <div class="card">
+    <div class="header-quiz">
+      <div>
+        <span id="badge-level" class="badge-level">Facile</span>
+        <span id="streak-display" class="streak" style="display:none">🔥 0</span>
+      </div>
+      <div id="chrono" class="chrono">⏱ 25</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div id="vs-scores" class="vs-card" style="display:none">
+      <div class="vs-player active" id="vs-p1"><div class="pname" id="vs-p1-nom">J1</div><div class="pscore" id="vs-p1-score">0</div></div>
+      <div style="display:flex;align-items:center;font-family:'Bebas Neue',sans-serif;font-size:1.5em;color:#aaa">VS</div>
+      <div class="vs-player" id="vs-p2"><div class="pname" id="vs-p2-nom">J2</div><div class="pscore" id="vs-p2-score">0</div></div>
+    </div>
+    <div class="question-num" id="question-num">Question 1 / 10</div>
+    <div id="vf-badge" class="vf-badge" style="display:none">VRAI ou FAUX</div>
+    <div class="question-text" id="question-text"></div>
+    <div id="options-container"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="next-btn" onclick="questionSuivante()">Suivant ➤</button>
+  </div>
+</div>
+
+<!-- RÉSULTAT SOLO -->
+<div class="screen" id="screen-resultat">
+  <div class="card">
+    <div class="score-card">
+      <div class="score-emoji" id="score-emoji">🏆</div>
+      <div class="score-num" id="score-num">0/10</div>
+      <div class="score-label" id="score-label">Bravo !</div>
+      <div class="score-details">
+        <div class="score-detail"><div class="num" id="res-correct">0</div><div class="lbl">✅ Bonnes</div></div>
+        <div class="score-detail"><div class="num" id="res-wrong">0</div><div class="lbl">❌ Mauvaises</div></div>
+        <div class="score-detail"><div class="num" id="res-streak">0</div><div class="lbl">🔥 Max streak</div></div>
+      </div>
+      <button class="btn btn-green" onclick="partagerWhatsApp()">📤 Partager WhatsApp</button>
+      <button class="btn" onclick="rejouer()">🔄 Rejouer</button>
+      <button class="btn btn-outline" onclick="showScreen('screen-classement')">🏆 Classement</button>
+      <button class="btn btn-outline" onclick="showScreen('screen-accueil')">🏠 Accueil</button>
+    </div>
+  </div>
+</div>
+
+<!-- RÉSULTAT DUO -->
+<div class="screen" id="screen-resultat-duo">
+  <div class="card" style="text-align:center">
+    <div style="font-size:3em" id="duo-emoji">🏆</div>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:2em;color:#FF6B00;margin:10px 0" id="duo-winner">Gagnant !</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0">
+      <div class="score-detail" id="duo-p1-result"><div class="num" id="duo-p1-score">0</div><div class="lbl" id="duo-p1-label">Joueur 1</div></div>
+      <div class="score-detail" id="duo-p2-result"><div class="num" id="duo-p2-score">0</div><div class="lbl" id="duo-p2-label">Joueur 2</div></div>
+    </div>
+    <button class="btn btn-green" onclick="partagerWhatsAppDuo()">📤 Partager WhatsApp</button>
+    <button class="btn" onclick="rejouer()">🔄 Rejouer</button>
+    <button class="btn btn-outline" onclick="showScreen('screen-accueil')">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- CLASSEMENT -->
+<div class="screen" id="screen-classement">
+  <div class="card">
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:2em;color:#FF6B00;margin-bottom:15px;text-align:center">🏆 Classement</h2>
+    <div class="tab-bar">
+      <button class="tab active" onclick="afficherClassement('facile',this)">😊 Facile</button>
+      <button class="tab" onclick="afficherClassement('moyen',this)">🤔 Moyen</button>
+      <button class="tab" onclick="afficherClassement('difficile',this)">🔥 Difficile</button>
+    </div>
+    <div id="classement-liste"></div>
+    <button class="btn btn-outline" style="margin-top:15px" onclick="showScreen('screen-accueil')">← Retour</button>
+  </div>
+</div>
+
+<div class="confetti-container" id="confetti-container"></div>
+
+<script>
+const QUESTIONS = {
+  facile:[
+    {type:'qcm',q:"Quelle est la capitale économique de la Côte d'Ivoire ?",options:["Yamoussoukro","Abidjan","Bouaké","San-Pédro"],r:1,info:"Abidjan est la capitale économique et la plus grande ville."},
+    {type:'vf',q:"Yamoussoukro est la capitale politique de la Côte d'Ivoire.",r:"Vrai",info:"Yamoussoukro est la capitale officielle depuis 1983."},
+    {type:'qcm',q:"Quelle est la monnaie de la Côte d'Ivoire ?",options:["Cedi","Naira","Franc CFA","Dinar"],r:2,info:"Le Franc CFA (FCFA) est la monnaie ivoirienne."},
+    {type:'vf',q:"La Côte d'Ivoire est le premier producteur mondial de cacao.",r:"Vrai",info:"La CI produit environ 40% du cacao mondial !"},
+    {type:'qcm',q:"Quel est le plat national ivoirien ?",options:["Jollof rice","Attiéké","Fufu","Thiéboudienne"],r:1,info:"L'attiéké est un plat à base de manioc râpé fermenté."},
+    {type:'vf',q:"Le drapeau ivoirien est orange, blanc et vert.",r:"Vrai",info:"Orange (savane), blanc (paix), vert (forêt)."},
+    {type:'qcm',q:"Dans quel golfe se trouve la Côte d'Ivoire ?",options:["Golfe de Guinée","Golfe du Bénin","Golfe de Gascogne","Golfe d'Aden"],r:0,info:"La CI est bordée par le Golfe de Guinée."},
+    {type:'vf',q:"Le zouglou est un style musical originaire de Côte d'Ivoire.",r:"Vrai",info:"Le zouglou est né à Abidjan dans les années 90."},
+    {type:'qcm',q:"Comment appelle-t-on les habitants de la Côte d'Ivoire ?",options:["Ivoirois","Ivoiriens","Côtiers","Ivoirais"],r:1,info:"Les habitants s'appellent les Ivoiriens."},
+    {type:'vf',q:"La Côte d'Ivoire a obtenu son indépendance en 1960.",r:"Vrai",info:"L'indépendance a été proclamée le 7 août 1960."},
+    {type:'qcm',q:"Quel est le surnom de l'équipe nationale de foot ?",options:["Les Lions","Les Éléphants","Les Léopards","Les Aigles"],r:1,info:"Les Éléphants de Côte d'Ivoire !"},
+    {type:'vf',q:"Felix Houphouët-Boigny était le premier président de la CI.",r:"Vrai",info:"Il a été président de 1960 à 1993."},
+    {type:'qcm',q:"Quelle langue est officielle en Côte d'Ivoire ?",options:["Anglais","Portugais","Français","Arabe"],r:2,info:"Le français est la langue officielle depuis la colonisation."},
+    {type:'vf',q:"Le coupé-décalé est une danse originaire du Ghana.",r:"Faux",info:"Le coupé-décalé vient d'Abidjan, inventé dans les années 2000."},
+    {type:'qcm',q:"Quel fruit symbolise la richesse de la CI ?",options:["Mangue","Ananas","Cacao","Noix de coco"],r:2,info:"Le cacao fait de la CI le 1er producteur mondial."},
+    {type:'vf',q:"Abidjan est bordée par la lagune Ébrié.",r:"Vrai",info:"La lagune Ébrié traverse Abidjan et sépare plusieurs quartiers."},
+    {type:'qcm',q:"Quel animal figure sur les armoiries de la CI ?",options:["Lion","Éléphant","Crocodile","Aigle"],r:1,info:"L'éléphant est le symbole national de la Côte d'Ivoire."},
+    {type:'vf',q:"Didier Drogba est le meilleur buteur de l'histoire des Éléphants.",r:"Vrai",info:"Drogba a marqué 65 buts avec les Éléphants."},
+    {type:'qcm',q:"Quelle est la deuxième plus grande ville de CI ?",options:["Daloa","San-Pédro","Bouaké","Korhogo"],r:2,info:"Bouaké est la 2ème ville avec environ 600 000 habitants."},
+    {type:'vf',q:"Le café est cultivé en Côte d'Ivoire.",r:"Vrai",info:"La CI est aussi un grand producteur de café, surtout dans l'ouest."},
+    {type:'qcm',q:"Comment dit-on 'merci' en Dioula ?",options:["Akpe","I ni ce","Ago","Bawo"],r:1,info:"'I ni ce' signifie merci en Dioula."},
+    {type:'vf',q:"Grand-Bassam était l'ancienne capitale coloniale de la CI.",r:"Vrai",info:"Grand-Bassam fut la 1ère capitale de la Côte d'Ivoire coloniale."},
+    {type:'qcm',q:"Quel groupe ivoirien a popularisé le coupé-décalé ?",options:["Magic System","Jet Set","Kiff No Beat","Suspect 95"],r:1,info:"Le Jet Set d'Abidjan a créé le coupé-décalé à Paris."},
+    {type:'vf',q:"L'anacarde (noix de cajou) est cultivé en CI.",r:"Vrai",info:"La CI est le 1er producteur mondial d'anacarde."},
+    {type:'qcm',q:"Quel est le préfixe téléphonique de la CI ?",options:["+224","+225","+226","+227"],r:1,info:"Le code pays de la Côte d'Ivoire est le +225."},
+    {type:'vf',q:"La CI a organisé la CAN 2023.",r:"Vrai",info:"La CI a organisé et remporté la CAN 2023-2024 !"},
+    {type:'qcm',q:"Quelle ville est connue pour ses masques traditionnels ?",options:["Abidjan","Man","Bouaké","Sassandra"],r:1,info:"Man, dans l'ouest, est réputée pour ses masques Dan."},
+    {type:'vf',q:"L'hymne national ivoirien s'appelle 'L'Abidjanaise'.",r:"Vrai",info:"L'Abidjanaise est l'hymne depuis l'indépendance en 1960."},
+    {type:'qcm',q:"Quel est le nom du stade principal d'Abidjan ?",options:["Stade de la Paix","Stade Félix Houphouët-Boigny","Stade de l'Amitié","Stade Bouaké"],r:1,info:"Le Stade FHB peut accueillir 35 000 spectateurs."},
+    {type:'vf',q:"Alpha Blondy est un chanteur de reggae ivoirien.",r:"Vrai",info:"Alpha Blondy est né à Dimbokro et est mondialement connu."},
+    {type:'qcm',q:"Quelle est la superficie approximative de la CI ?",options:["222 000 km²","322 000 km²","422 000 km²","122 000 km²"],r:1,info:"La Côte d'Ivoire fait environ 322 463 km²."},
+    {type:'vf',q:"La CI est un pays enclavé sans accès à la mer.",r:"Faux",info:"La CI a 550 km de côtes sur le Golfe de Guinée."},
+    {type:'qcm',q:"Quel est le nom du quartier des affaires d'Abidjan ?",options:["Cocody","Yopougon","Le Plateau","Marcory"],r:2,info:"Le Plateau est le centre administratif et des affaires d'Abidjan."},
+    {type:'vf',q:"Le baoulé est une langue parlée en CI.",r:"Vrai",info:"Le baoulé est parlé par environ 20% des Ivoiriens."},
+    {type:'qcm',q:"Combien d'habitants environ a la Côte d'Ivoire ?",options:["10 millions","17 millions","27 millions","35 millions"],r:2,info:"La CI compte environ 27 millions d'habitants (2023)."},
+    {type:'vf',q:"Magic System est un groupe de musique ivoirien.",r:"Vrai",info:"Magic System a popularisé le zouglou dans les années 90-2000."},
+    {type:'qcm',q:"Quelle religion est majoritaire en CI ?",options:["Christianisme","Islam","Animisme","Hindouisme"],r:1,info:"L'islam est pratiqué par environ 40-45% de la population."},
+    {type:'vf',q:"Le Parc National de Taï est classé UNESCO.",r:"Vrai",info:"Le Parc de Taï est un patrimoine mondial UNESCO depuis 1982."},
+    {type:'qcm',q:"Quel est le nom du plat à base d'igname pilée ?",options:["Foutou","Attiéké","Aloko","Kedjenou"],r:0,info:"Le foutou d'igname est un plat très populaire en CI."},
+    {type:'vf',q:"Abidjan s'appelle 'la perle des lagunes'.",r:"Vrai",info:"Abidjan est surnommée 'la perle des lagunes' ou 'Paris de l'Afrique'."},
+    {type:'qcm',q:"Quel est l'aliment de base au nord de la CI ?",options:["Riz","Igname","Mil/sorgho","Manioc"],r:0,info:"Le riz est l'aliment de base dans le nord ivoirien."},
+    {type:'vf',q:"La CI est membre de l'Union Africaine.",r:"Vrai",info:"La CI est membre de l'Union Africaine depuis sa fondation."},
+    {type:'qcm',q:"Quel instrument traditionnel est associé aux griots ivoiriens ?",options:["Djembé","Kora","Balafon","Ngoni"],r:2,info:"Le balafon est un xylophone traditionnel très présent en CI."},
+    {type:'vf',q:"Sassandra est une ville côtière de CI.",r:"Vrai",info:"Sassandra est une ville portuaire de l'ouest ivoirien."},
+    {type:'qcm',q:"Qu'est-ce que l'aloko ?",options:["Un tissu","Des bananes plantain frites","Un masque","Une danse"],r:1,info:"L'aloko est un plat populaire de bananes plantain frites."},
+    {type:'vf',q:"Le Port Autonome d'Abidjan est le plus grand port d'Afrique de l'Ouest.",r:"Vrai",info:"Le Port d'Abidjan est le 1er port d'Afrique de l'Ouest."},
+    {type:'qcm',q:"Quel est le fleuve le plus long de CI ?",options:["Sassandra","Bandama","Comoé","Cavally"],r:2,info:"La Comoé est le plus long fleuve de CI avec 1 160 km."},
+    {type:'vf',q:"La CI partage une frontière avec le Liberia.",r:"Vrai",info:"Le Liberia est à l'ouest de la Côte d'Ivoire."},
+    {type:'qcm',q:"Comment s'appelle le pagne traditionnel ivoirien ?",options:["Kente","Kita","Basin","Bogolan"],r:1,info:"Le Kita est le pagne traditionnel tissé en CI, surtout chez les Baoulé."},
+    {type:'vf',q:"Korhogo est connue pour son tissu peint traditionnel.",r:"Vrai",info:"Le tissu de Korhogo est un artisanat réputé mondialement."},
+    {type:'qcm',q:"Quel est le nom du marché principal d'Abidjan ?",options:["Marché du Plateau","Marché d'Adjamé","Marché de Cocody","Marché central"],r:1,info:"Le Marché d'Adjamé est le plus grand marché d'Abidjan."},
+  ],
+  moyen:[
+    {type:'qcm',q:"En quelle année la CI a remporté sa première CAN ?",options:["1984","1990","1992","1996"],r:2,info:"La CI a remporté la CAN 1992 face au Ghana aux tirs au but."},
+    {type:'vf',q:"La basilique de Yamoussoukro est la plus grande église du monde.",r:"Vrai",info:"Construite en 1989, elle dépasse Saint-Pierre de Rome."},
+    {type:'qcm',q:"Quel est le principal port de CI ?",options:["Port de Bassam","Port d'Abidjan","Port de San-Pédro","Port de Sassandra"],r:1,info:"Le Port Autonome d'Abidjan est le premier d'Afrique de l'Ouest."},
+    {type:'vf',q:"Didier Drogba a joué pour l'Olympique de Marseille.",r:"Vrai",info:"Drogba a joué à l'OM de 2003 à 2004 avant Chelsea."},
+    {type:'qcm',q:"Quelle langue est la plus parlée au nord ?",options:["Baoulé","Dioula","Bété","Senoufo"],r:1,info:"Le Dioula est la langue commerciale du nord."},
+    {type:'vf',q:"La CI partage une frontière avec le Mali.",r:"Vrai",info:"La CI partage des frontières avec 5 pays dont le Mali."},
+    {type:'vf',q:"Le café est plus produit que le cacao en CI.",r:"Faux",info:"Le cacao domine largement, CI = 1er producteur mondial."},
+    {type:'qcm',q:"Que signifie 'Nouchi' ?",options:["Un plat","Un argot","Un instrument","Une ville"],r:1,info:"Le Nouchi est l'argot populaire né à Abidjan."},
+    {type:'vf',q:"Alpha Blondy chante principalement en français et en dioula.",r:"Vrai",info:"Alpha Blondy chante en dioula, français, anglais et hébreu."},
+    {type:'qcm',q:"Quel est le plus grand parc national de CI ?",options:["Parc de Taï","Parc de la Comoé","Parc du Banco","Parc d'Azagny"],r:1,info:"Le Parc National de la Comoé est le plus grand, classé UNESCO."},
+    {type:'vf',q:"Laurent Gbagbo a été président de la CI.",r:"Vrai",info:"Laurent Gbagbo a été président de 2000 à 2011."},
+    {type:'qcm',q:"Quelle est la principale boisson traditionnelle ivoirienne ?",options:["Sodabi","Bangui","Tchakpalo","Dolo"],r:1,info:"Le bangui est un vin de palme très populaire en CI."},
+    {type:'vf',q:"Le kedjenou est un plat ivoirien à base de poulet.",r:"Vrai",info:"Le kedjenou est un ragoût de poulet cuit à l'étouffée."},
+    {type:'qcm',q:"Combien de fois la CI a remporté la CAN ?",options:["1 fois","2 fois","3 fois","4 fois"],r:2,info:"La CI a remporté la CAN en 1992, 2015 et 2024."},
+    {type:'vf',q:"Yamoussoukro est plus grande qu'Abidjan.",r:"Faux",info:"Abidjan est bien plus grande, Yamoussoukro est la capitale politique."},
+    {type:'qcm',q:"Quel est le vrai nom de l'artiste DJ Arafat ?",options:["Ange Didier Houon","Joël Tébé","Serge Beynaud","Stephane Mensah"],r:0,info:"DJ Arafat s'appelait Ange Didier Houon, né en 1986 à Abidjan."},
+    {type:'vf',q:"Le bobaraba est une danse ivoirienne.",r:"Vrai",info:"Le bobaraba est une danse popularisée par DJ Arafat."},
+    {type:'qcm',q:"Qui a écrit le roman 'Climbié' ?",options:["Ahmadou Kourouma","Bernard Dadié","Véronique Tadjo","Jean-Marie Adiaffi"],r:1,info:"Bernard Dadié a écrit Climbié en 1956, premier roman ivoirien."},
+    {type:'vf',q:"Ahmadou Kourouma est un écrivain ivoirien célèbre.",r:"Vrai",info:"Kourouma a écrit 'Les Soleils des Indépendances' en 1968."},
+    {type:'qcm',q:"Dans quel quartier d'Abidjan se trouve le Plateau ?",options:["Sur une île","En banlieue","Au nord","À l'est"],r:0,info:"Le Plateau est sur une île entre la lagune et la mer."},
+    {type:'vf',q:"La CI produit du coton.",r:"Vrai",info:"Le coton est cultivé au nord de la CI, notamment à Korhogo."},
+    {type:'qcm',q:"Quel est le nom du premier ministre actuel de CI en 2024 ?",options:["Amadou Gon Coulibaly","Robert Beugré Mambé","Alassane Ouattara","Patrick Achi"],r:3,info:"Patrick Achi est premier ministre depuis 2021."},
+    {type:'vf',q:"Le Sénat existe en Côte d'Ivoire.",r:"Vrai",info:"La CI a un Parlement bicaméral avec l'Assemblée nationale et le Sénat."},
+    {type:'qcm',q:"Quelle ville organise le Festival des Masques ?",options:["Abidjan","Man","Korhogo","Daloa"],r:1,info:"Man organise le célèbre Festival des Masques chaque année."},
+    {type:'vf',q:"Le woro-woro est un taxi collectif à Abidjan.",r:"Vrai",info:"Le woro-woro est le taxi partagé emblématique d'Abidjan."},
+    {type:'qcm',q:"Quel pays a colonisé la CI ?",options:["Angleterre","Portugal","France","Espagne"],r:2,info:"La France a colonisé la CI de 1893 jusqu'à l'indépendance en 1960."},
+    {type:'vf',q:"Le PDCI est le plus vieux parti politique de CI.",r:"Vrai",info:"Le PDCI-RDA a été fondé en 1946 par Houphouët-Boigny."},
+    {type:'qcm',q:"Comment s'appelle la danse traditionnelle des Bété ?",options:["Gbégbé","Goli","Dô","Poro"],r:0,info:"Le Gbégbé est la danse traditionnelle emblématique du peuple Bété."},
+    {type:'vf',q:"La CI a plus de 60 groupes ethniques.",r:"Vrai",info:"La CI compte plus de 60 ethnies réparties en 4 grands groupes."},
+    {type:'qcm',q:"Quel est le symbole de la ville d'Abidjan ?",options:["La tour Eiffel","Le pont Houphouët-Boigny","La basilique","La lagune"],r:1,info:"Le Pont Houphouët-Boigny est le symbole emblématique d'Abidjan."},
+    {type:'vf',q:"La Côte d'Ivoire est membre de la CEDEAO.",r:"Vrai",info:"La CI est membre fondateur de la CEDEAO depuis 1975."},
+    {type:'qcm',q:"Quel artiste a popularisé le 'Gnakpa' ?",options:["Magic System","DJ Arafat","Petit Denis","Meiway"],r:1,info:"DJ Arafat a popularisé le 'couper-coller' et plusieurs danses."},
+    {type:'vf',q:"L'Université Felix Houphouët-Boigny est à Abidjan.",r:"Vrai",info:"Elle est à Cocody, Abidjan, et est la plus grande université de CI."},
+    {type:'qcm',q:"Que signifie 'on va gérer' en Nouchi ?",options:["On va partir","On va s'en occuper","On va manger","On va danser"],r:1,info:"'On va gérer' signifie qu'on va s'en occuper, régler la situation."},
+    {type:'vf',q:"Le groupe RFI est présent en Côte d'Ivoire.",r:"Vrai",info:"RFI (Radio France Internationale) diffuse largement en CI."},
+    {type:'qcm',q:"Quelle ethnie domine le centre de la CI ?",options:["Dioula","Bété","Baoulé","Senoufo"],r:2,info:"Les Baoulé sont majoritaires dans le centre de la CI."},
+    {type:'vf',q:"Le pays Yacouba se trouve à l'ouest de la CI.",r:"Vrai",info:"Les Yacouba (ou Dan) vivent dans la région de Man, à l'ouest."},
+    {type:'qcm',q:"Quel est le nom du journal le plus ancien de CI ?",options:["Fraternité Matin","Le Jour","Le Patriote","Soir Info"],r:0,info:"Fraternité Matin est le quotidien national fondé en 1964."},
+    {type:'vf',q:"La CI est le seul pays d'Afrique à avoir une basilique.",r:"Faux",info:"D'autres pays africains ont des basiliques, mais celle de Yamoussoukro est la plus grande."},
+    {type:'qcm',q:"Quelle est la signification de 'Abidjan' ?",options:["Ville des lacs","J'ai coupé les herbes","Terre des ancêtres","Cité des lumières"],r:1,info:"Selon la légende, 'Abidjan' vient de 'M'Bi Djan' : j'ai coupé les herbes."},
+    {type:'vf',q:"La CI exporte du pétrole.",r:"Vrai",info:"La CI produit et exporte du pétrole brut depuis les années 80."},
+    {type:'qcm',q:"Quel sport traditionnel est pratiqué à Abidjan sur les plages ?",options:["Football de plage","Lutte traditionnelle","Natation","Pétanque"],r:1,info:"La lutte traditionnelle est très pratiquée dans les quartiers d'Abidjan."},
+    {type:'vf',q:"Yopougon est le quartier le plus peuplé d'Abidjan.",r:"Vrai",info:"Yopougon compte plus d'un million d'habitants, c'est le plus peuplé."},
+    {type:'qcm',q:"Qui était le premier ministre lors de l'indépendance en 1960 ?",options:["Houphouët-Boigny","Henri Konan Bédié","Alassane Ouattara","Seydou Diarra"],r:0,info:"Houphouët-Boigny était à la fois président et premier ministre en 1960."},
+    {type:'vf',q:"La CI a une façade maritime sur l'océan Atlantique.",r:"Vrai",info:"La CI est bordée par l'Atlantique (Golfe de Guinée) sur 550 km."},
+    {type:'qcm',q:"Que signifie 'bleu-blanc-rouge' en contexte ivoirien ?",options:["La France","La police","Un cocktail","L'équipe nationale"],r:0,info:"Le bleu-blanc-rouge désigne la France, ancienne puissance coloniale."},
+    {type:'vf',q:"Le Festival MASA se tient à Abidjan.",r:"Vrai",info:"Le MASA (Marché des Arts et du Spectacle Africain) est à Abidjan."},
+    {type:'qcm',q:"Quelle ville est surnommée 'la belle' ?",options:["Bouaké","Grand-Bassam","Daloa","Korhogo"],r:1,info:"Grand-Bassam est surnommée 'la belle', ancienne capitale coloniale."},
+    {type:'vf',q:"Serge Beynaud est un artiste coupé-décalé.",r:"Vrai",info:"Serge Beynaud est l'un des artistes coupé-décalé les plus populaires."},
+    {type:'qcm',q:"Quelle est la principale religion traditionnelle des Senoufo ?",options:["Islam","Christianisme","Animisme Poro","Vaudou"],r:2,info:"Le Poro est la société initiatique traditionnelle des Senoufo."},
+    {type:'vf',q:"La CI a une équipe nationale de basketball.",r:"Vrai",info:"La CI participe aux compétitions africaines de basketball."},
+  ],
+  difficile:[
+    {type:'qcm',q:"En quelle année a été créé le PDCI ?",options:["1944","1946","1950","1952"],r:1,info:"Le PDCI-RDA a été fondé le 9 avril 1946 à Treichville."},
+    {type:'vf',q:"La CI a connu un coup d'état en 1999.",r:"Vrai",info:"Le général Robert Gueï a renversé Henri Konan Bédié le 24 décembre 1999."},
+    {type:'qcm',q:"Quel groupe ethnique sont les Krou ?",options:["Groupe du nord","Groupe du sud-ouest","Groupe akan","Groupe mandé"],r:1,info:"Les Krou (Bété, Dida, Wé) sont établis au sud-ouest du pays."},
+    {type:'vf',q:"Tiébissou est la ville natale d'Houphouët-Boigny.",r:"Faux",info:"Houphouët-Boigny est né à Yamoussoukro le 18 octobre 1905."},
+    {type:'qcm',q:"Quelle est la devise nationale de la CI ?",options:["Paix Justice Travail","Union Discipline Travail","Liberté Égalité Fraternité","Foi Travail Patrie"],r:1,info:"La devise est 'Union - Discipline - Travail'."},
+    {type:'vf',q:"Le Mont Nimba est le point culminant de la CI.",r:"Vrai",info:"Le Mont Nimba culmine à 1752 m, à la frontière avec la Guinée."},
+    {type:'vf',q:"L'hymne national ivoirien s'appelle 'L'Abidjanaise'.",r:"Vrai",info:"L'Abidjanaise est l'hymne national depuis 1960."},
+    {type:'qcm',q:"Qui a composé la musique de l'hymne national ivoirien ?",options:["Mathieu Ekra","Pierre Marie Coty","Joachim Bony","François Lougah"],r:2,info:"Joachim Bony a composé la musique, Mathieu Ekra a écrit les paroles."},
+    {type:'vf',q:"La CI est le 1er producteur mondial d'anacarde.",r:"Vrai",info:"La CI est le 1er producteur mondial de noix de cajou depuis les années 2010."},
+    {type:'qcm',q:"En quelle année Grand-Bassam a été inscrite à l'UNESCO ?",options:["2005","2012","2018","2000"],r:1,info:"Grand-Bassam a été inscrite au patrimoine mondial UNESCO en 2012."},
+    {type:'vf',q:"Le fleuve Sassandra prend sa source en Guinée.",r:"Vrai",info:"Le Sassandra prend sa source dans le Fouta Djalon en Guinée."},
+    {type:'qcm',q:"Quel est le vrai nom du leader de Magic System ?",options:["Asalfo","Goudé","Manadja","Tino"],r:0,info:"Asalfo (Salif Traoré) est le fondateur et leader de Magic System."},
+    {type:'vf',q:"Le 7 août est un jour férié en CI.",r:"Vrai",info:"Le 7 août est la fête nationale ivoirienne, jour de l'indépendance."},
+    {type:'qcm',q:"Quelle est la longueur du littoral ivoirien ?",options:["350 km","550 km","750 km","950 km"],r:1,info:"Le littoral ivoirien s'étend sur environ 550 km."},
+    {type:'vf',q:"Alassane Ouattara a été Premier Ministre avant d'être Président.",r:"Vrai",info:"Ouattara a été PM de 1990 à 1993 sous Houphouët-Boigny."},
+    {type:'qcm',q:"Combien de régions compte la CI ?",options:["14 régions","19 régions","31 régions","26 régions"],r:0,info:"La CI est divisée en 14 régions depuis la réforme administrative."},
+    {type:'vf',q:"La société secrète Poro régit la vie des hommes Senoufo.",r:"Vrai",info:"Le Poro est une société initiatique qui structure la société Senoufo."},
+    {type:'qcm',q:"Qui est l'auteur du roman 'Allah n'est pas obligé' ?",options:["Bernard Dadié","Ahmadou Kourouma","Véronique Tadjo","Jean-Marie Adiaffi"],r:1,info:"Ahmadou Kourouma a écrit ce roman en 2000, prix Renaudot et Goncourt des lycéens."},
+    {type:'vf',q:"Le Guébié est un groupe ethnique Bété.",r:"Vrai",info:"Les Guébié font partie des sous-groupes du peuple Bété."},
+    {type:'qcm',q:"Quelle guerre civile a divisé la CI en deux ?",options:["Guerre du Biafra","Crise ivoirienne 2002-2007","Guerre du Golfe","Révolution de 1990"],r:1,info:"La crise de 2002 a divisé le pays entre nord (FN) et sud (gouvernement)."},
+    {type:'vf',q:"Le traité de paix de Ouagadougou a mis fin à la crise ivoirienne.",r:"Vrai",info:"L'Accord Politique de Ouagadougou (APO) a été signé en mars 2007."},
+    {type:'qcm',q:"Quelle est la principale ethnie de San-Pédro ?",options:["Dida","Krou","Bakwé","Bété"],r:2,info:"Les Bakwé sont le peuple autochtone de la région de San-Pédro."},
+    {type:'vf',q:"La CI a été le premier producteur mondial de café dans les années 70.",r:"Vrai",info:"La CI était le 3ème producteur mondial de café et 1er africain dans les années 70."},
+    {type:'qcm',q:"En quelle année a été construite la Basilique de Yamoussoukro ?",options:["1985","1989","1993","1997"],r:1,info:"La Basilique Notre-Dame de la Paix a été construite et consacrée en 1989."},
+    {type:'vf',q:"L'opération Licorne était une force française en CI.",r:"Vrai",info:"L'opération Licorne était la force militaire française déployée en CI de 2002 à 2015."},
+    {type:'qcm',q:"Quel est le nom de la monnaie commune aux pays de l'UEMOA ?",options:["Franc CFA BEAC","Franc CFA BCEAO","Euro africain","Franc ouest-africain"],r:1,info:"Le Franc CFA émis par la BCEAO est utilisé dans les 8 pays de l'UEMOA."},
+    {type:'vf',q:"Houphouët-Boigny a été le plus longtemps au pouvoir en Afrique.",r:"Faux",info:"Il a gouverné 33 ans, mais d'autres dirigeants africains ont régné plus longtemps."},
+    {type:'qcm',q:"Quel est le nom de la principale académie militaire de CI ?",options:["EMIA","École de Gendarmerie","École Spéciale Militaire","Académie Navale"],r:0,info:"L'EMIA (École Militaire Inter-Armes) forme les officiers ivoiriens."},
+    {type:'vf',q:"Le Port de San-Pédro exporte principalement du bois et du cacao.",r:"Vrai",info:"San-Pédro est le 2ème port de CI, spécialisé dans le cacao et le bois."},
+    {type:'qcm',q:"Combien d'étoiles compte le drapeau de la CI ?",options:["0","1","3","5"],r:0,info:"Le drapeau ivoirien ne comporte aucune étoile, seulement 3 bandes verticales."},
+    {type:'vf',q:"La CI a adopté une nouvelle constitution en 2016.",r:"Vrai",info:"La nouvelle constitution a été adoptée par référendum le 30 octobre 2016."},
+    {type:'qcm',q:"Quelle ville est le berceau du peuple Agni ?",options:["Bondoukou","Abengourou","Agnibilékrou","Dimbokro"],r:1,info:"Abengourou est la capitale du pays Agni, dans l'est de la CI."},
+    {type:'vf',q:"Le lac de Kossou est artificiel.",r:"Vrai",info:"Le lac de Kossou a été créé par le barrage de Kossou sur le Bandama en 1972."},
+    {type:'qcm',q:"Qui a écrit 'Les Soleils des Indépendances' ?",options:["Bernard Dadié","Ahmadou Kourouma","Camara Laye","Mongo Beti"],r:1,info:"Ahmadou Kourouma a écrit ce roman en 1968, premier chef-d'œuvre de la littérature ivoirienne."},
+    {type:'vf',q:"La CI possède des réserves d'or.",r:"Vrai",info:"La CI exploite des mines d'or notamment dans la région d'Ity à l'ouest."},
+    {type:'qcm',q:"Quel est le taux de francophonie en CI ?",options:["30%","50%","70%","90%"],r:1,info:"Environ 50% des Ivoiriens parlent le français."},
+    {type:'vf',q:"Le masque Goli appartient à la culture Baoulé.",r:"Vrai",info:"Le masque Goli est une cérémonie festive du peuple Baoulé."},
+    {type:'qcm',q:"Quelle ethnie est à l'origine du masque 'Zamblé' ?",options:["Bété","Gouro","Dan","Wé"],r:1,info:"Le masque Zamblé appartient au peuple Gouro du centre-ouest de la CI."},
+    {type:'vf',q:"La CI a une représentation diplomatique à l'ONU.",r:"Vrai",info:"La CI est membre de l'ONU depuis le 20 septembre 1960."},
+    {type:'qcm',q:"Quel conflit a précédé l'élection présidentielle de 2010 ?",options:["Guerre civile","Crise post-électorale","Coup d'état","Révolution"],r:1,info:"La crise post-électorale de 2010-2011 a suivi la victoire d'Ouattara sur Gbagbo."},
+    {type:'vf',q:"Abidjan accueille le siège de la Banque Africaine de Développement.",r:"Vrai",info:"Le siège de la BAD est à Abidjan depuis 2014 après son retour de Tunis."},
+    {type:'qcm',q:"Quel est le nom du programme économique d'Ouattara ?",options:["Plan Émergence","PND 2021-2025","Vision CI 2030","Plan Développement"],r:1,info:"Le PND (Plan National de Développement) structure la politique économique ivoirienne."},
+    {type:'vf',q:"La CI est le pays avec le plus grand nombre d'ethnies d'Afrique de l'Ouest.",r:"Faux",info:"Le Nigeria avec 250+ ethnies dépasse largement la CI et ses 60+ ethnies."},
+    {type:'qcm',q:"En quelle année s'est tenue la 1ère élection présidentielle pluraliste en CI ?",options:["1980","1990","1995","2000"],r:1,info:"La première élection pluraliste a eu lieu en 1990, remportée par Houphouët-Boigny."},
+    {type:'vf',q:"Le Bandama est un fleuve qui se jette dans le Golfe de Guinée.",r:"Vrai",info:"Le Bandama se jette dans la mer près de Grand-Lahou."},
+    {type:'qcm',q:"Quelle est la religion traditionnelle des Dan (Yacouba) ?",options:["Islam","Christianisme","Animisme","Hindouisme"],r:2,info:"Les Dan pratiquent une religion animiste avec des masques sacrés."},
+    {type:'vf',q:"La CI a été membre non permanent du Conseil de Sécurité de l'ONU.",r:"Vrai",info:"La CI a siégé au Conseil de Sécurité de l'ONU en 2018-2019."},
+    {type:'qcm',q:"Quelle ville est connue pour le festival 'Fête du Dipri' ?",options:["Man","Gomon","Korhogo","Daloa"],r:1,info:"La Fête du Dipri de Gomon (Abobo-Doumé) est une cérémonie de purification unique."},
+    {type:'vf',q:"La langue Agni appartient au groupe Akan.",r:"Vrai",info:"L'Agni, comme le Baoulé, appartient au groupe linguistique Akan."},
+    {type:'qcm',q:"Quel est le nom de la plus haute juridiction de CI ?",options:["Cour Supreme","Conseil Constitutionnel","Tribunal d'État","Cour de Cassation"],r:0,info:"La Cour Suprême est la plus haute juridiction judiciaire de Côte d'Ivoire."},
+    {type:'vf',q:"Le barrage de Soubré est le plus grand barrage hydroélectrique de CI.",r:"Vrai",info:"Le barrage de Soubré, inauguré en 2017, est le plus puissant de CI avec 275 MW."},
+  ]
+};
+
+let mode='solo', niveau='facile', questions=[], qIndex=0;
+let score=0, bonnes=0, mauvaises=0, streak=0, maxStreak=0, tempsTotal=0;
+let chronoInterval=null, tempsRestant=25;
+let nomJoueur='Joueur', niveauActuel='facile';
+let joueurActuel=1, scoresJoueurs=[0,0], nomsJoueurs=['Joueur 1','Joueur 2'];
+let questionsJ1=[], questionsJ2=[];
+let soundEnabled=true;
+
+const audioCtx=typeof AudioContext!=='undefined'?new AudioContext():typeof webkitAudioContext!=='undefined'?new webkitAudioContext():null;
+
+function playSound(type){
+  if(!soundEnabled||!audioCtx)return;
+  try{
+    const o=audioCtx.createOscillator();const g=audioCtx.createGain();
+    o.connect(g);g.connect(audioCtx.destination);
+    if(type==='correct'){o.frequency.setValueAtTime(523,audioCtx.currentTime);o.frequency.setValueAtTime(659,audioCtx.currentTime+0.1);o.frequency.setValueAtTime(784,audioCtx.currentTime+0.2);g.gain.setValueAtTime(0.3,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5);o.start(audioCtx.currentTime);o.stop(audioCtx.currentTime+0.5);}
+    else if(type==='wrong'){o.frequency.setValueAtTime(300,audioCtx.currentTime);o.frequency.setValueAtTime(200,audioCtx.currentTime+0.15);g.gain.setValueAtTime(0.3,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.4);o.start(audioCtx.currentTime);o.stop(audioCtx.currentTime+0.4);}
+    else if(type==='tick'){o.frequency.setValueAtTime(800,audioCtx.currentTime);g.gain.setValueAtTime(0.1,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.05);o.start(audioCtx.currentTime);o.stop(audioCtx.currentTime+0.05);}
+    else if(type==='win'){[523,659,784,1047].forEach((f,i)=>{const o2=audioCtx.createOscillator();const g2=audioCtx.createGain();o2.connect(g2);g2.connect(audioCtx.destination);o2.frequency.value=f;g2.gain.setValueAtTime(0.3,audioCtx.currentTime+i*0.12);g2.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+i*0.12+0.2);o2.start(audioCtx.currentTime+i*0.12);o2.stop(audioCtx.currentTime+i*0.12+0.2);});}
+  }catch(e){}
+}
+
+function toggleSound(){soundEnabled=!soundEnabled;document.getElementById('sound-btn').textContent=soundEnabled?'🔊':'🔇';}
+
+function lancerConfettis(){
+  const container=document.getElementById('confetti-container');container.innerHTML='';
+  const colors=['#FF6B00','#FFD700','#009A44','#FF3333','#0066FF','#FF69B4','#00FFFF'];
+  for(let i=0;i<80;i++){
+    const c=document.createElement('div');c.className='confetti-piece';
+    c.style.cssText='left:'+Math.random()*100+'vw;background:'+colors[Math.floor(Math.random()*colors.length)]+';width:'+Math.round(6+Math.random()*10)+'px;height:'+Math.round(6+Math.random()*10)+'px;animation-duration:'+Math.round(2+Math.random()*2)+'s;animation-delay:'+Math.random()*0.5+'s';
+    container.appendChild(c);
+  }
+  setTimeout(()=>container.innerHTML='',4000);
+}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='screen-classement')afficherClassement('facile',document.querySelector('.tab'));}
+
+function choisirMode(m){
+  mode=m;
+  document.getElementById('mode-solo').className='mode-btn'+(m==='solo'?' selected':'');
+  document.getElementById('mode-duo').className='mode-btn'+(m==='duo'?' selected':'');
+  document.getElementById('noms-solo').style.display=m==='solo'?'block':'none';
+  document.getElementById('noms-duo').style.display=m==='duo'?'block':'none';
+}
+
+function demarrer(niv){
+  niveauActuel=niv;
+  const tempsParNiveau={facile:25,moyen:20,difficile:15};
+  if(mode==='duo'){
+    const n1=document.getElementById('player1-name').value.trim()||'Joueur 1';
+    const n2=document.getElementById('player2-name').value.trim()||'Joueur 2';
+    nomsJoueurs=[n1,n2];joueurActuel=1;scoresJoueurs=[0,0];
+    const pool=melanger([...QUESTIONS[niv]]);
+    questionsJ1=pool.slice(0,10);questionsJ2=melanger([...QUESTIONS[niv]]).slice(0,10);
+    questions=questionsJ1;
+    document.getElementById('vs-scores').style.display='flex';
+    document.getElementById('joueur-tour-banner').style.display='block';
+    document.getElementById('joueur-tour-nom').textContent=n1;
+    document.getElementById('vs-p1-nom').textContent=n1;document.getElementById('vs-p2-nom').textContent=n2;
+    document.getElementById('vs-p1-score').textContent='0';document.getElementById('vs-p2-score').textContent='0';
+    document.getElementById('vs-p1').className='vs-player active';document.getElementById('vs-p2').className='vs-player';
+  }else{
+    nomJoueur=document.getElementById('player-name').value.trim()||'Joueur';
+    questions=melanger([...QUESTIONS[niv]]).slice(0,10);
+    document.getElementById('vs-scores').style.display='none';
+    document.getElementById('joueur-tour-banner').style.display='none';
+  }
+  qIndex=0;score=0;bonnes=0;mauvaises=0;tempsTotal=0;streak=0;maxStreak=0;
+  const colors={facile:'linear-gradient(135deg,#00C851,#00E676)',moyen:'linear-gradient(135deg,#FF6B00,#FFA500)',difficile:'linear-gradient(135deg,#c62828,#e53935)'};
+  const labels={facile:'😊 Facile',moyen:'🤔 Moyen',difficile:'🔥 Difficile'};
+  document.getElementById('badge-level').style.background=colors[niv];
+  document.getElementById('badge-level').textContent=labels[niv];
+  showScreen('screen-quiz');afficherQuestion();
+}
+
+function melanger(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+
+function afficherQuestion(){
+  if(qIndex>=questions.length){finTour();return;}
+  const q=questions[qIndex];
+  const temps={facile:25,moyen:20,difficile:15};
+  tempsRestant=temps[niveauActuel];
+  document.getElementById('question-num').textContent='Question '+(qIndex+1)+' / '+questions.length;
+  document.getElementById('progress-fill').style.width=((qIndex/questions.length)*100)+'%';
+  document.getElementById('question-text').textContent=q.q;
+  document.getElementById('question-text').classList.remove('answer-anim');
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('next-btn').className='next-btn';
+  const streakEl=document.getElementById('streak-display');
+  if(streak>=2){streakEl.style.display='inline-block';streakEl.textContent='🔥 '+streak;}
+  else streakEl.style.display='none';
+  if(q.type==='vf'){
+    document.getElementById('vf-badge').style.display='inline-block';
+    document.getElementById('options-container').innerHTML='<div class="vf-grid"><button class="vf-btn" style="color:#2d5a1b;border-color:#4caf50" onclick="repondreVF(\'Vrai\')">✅ VRAI</button><button class="vf-btn" style="color:#c62828;border-color:#e53935" onclick="repondreVF(\'Faux\')">❌ FAUX</button></div>';
+  }else{
+    document.getElementById('vf-badge').style.display='none';
+    document.getElementById('options-container').innerHTML='<div class="options">'+q.options.map((o,i)=>'<button class="option-btn" onclick="repondreQCM('+i+')">'+String.fromCharCode(65+i)+'. '+o+'</button>').join('')+'</div>';
+  }
+  demarrerChrono();
+}
+
+function demarrerChrono(){
+  clearInterval(chronoInterval);
+  const el=document.getElementById('chrono');el.classList.remove('danger');
+  function update(){
+    el.textContent='⏱ '+tempsRestant;
+    if(tempsRestant<=5){el.classList.add('danger');if(tempsRestant>0)playSound('tick');}
+    else el.classList.remove('danger');
+    if(tempsRestant<=0){clearInterval(chronoInterval);tempsEcoule();}
+    tempsRestant--;
+  }
+  update();chronoInterval=setInterval(update,1000);
+}
+
+function tempsEcoule(){
+  clearInterval(chronoInterval);
+  const q=questions[qIndex];mauvaises++;streak=0;playSound('wrong');
+  if(q.type==='vf'){document.querySelectorAll('.vf-btn').forEach(b=>b.disabled=true);const ci=q.r==='Vrai'?0:1;document.querySelectorAll('.vf-btn')[ci].classList.add('correct');}
+  else{document.querySelectorAll('.option-btn').forEach((b,i)=>{b.disabled=true;if(i===q.r)b.classList.add('reveal');});}
+  afficherFeedback(false,'⏰ Temps écoulé ! '+q.info);
+  document.getElementById('next-btn').className='next-btn show';
+}
+
+function repondreQCM(idx){
+  clearInterval(chronoInterval);
+  const q=questions[qIndex];const correct=idx===q.r;
+  const t={facile:25,moyen:20,difficile:15}[niveauActuel];
+  tempsTotal+=(t-tempsRestant);
+  document.querySelectorAll('.option-btn').forEach((b,i)=>{b.disabled=true;if(i===q.r)b.classList.add('correct');else if(i===idx&&!correct)b.classList.add('wrong');});
+  traiterReponse(correct,q.info);
+}
+
+function repondreVF(rep){
+  clearInterval(chronoInterval);
+  const q=questions[qIndex];const correct=rep===q.r;
+  const t={facile:25,moyen:20,difficile:15}[niveauActuel];
+  tempsTotal+=(t-tempsRestant);
+  document.querySelectorAll('.vf-btn').forEach(b=>b.disabled=true);
+  const ci=q.r==='Vrai'?0:1;const ri=rep==='Vrai'?0:1;
+  document.querySelectorAll('.vf-btn')[ci].classList.add('correct');
+  if(!correct)document.querySelectorAll('.vf-btn')[ri].classList.add('wrong');
+  traiterReponse(correct,q.info);
+}
+
+function traiterReponse(correct,info){
+  if(correct){score++;bonnes++;streak++;if(streak>maxStreak)maxStreak=streak;playSound('correct');}
+  else{mauvaises++;streak=0;playSound('wrong');}
+  if(mode==='duo'){
+    const jIdx=joueurActuel-1;
+    if(correct)scoresJoueurs[jIdx]++;
+    document.getElementById('vs-p'+(jIdx+1)+'-score').textContent=scoresJoueurs[jIdx];
+  }
+  afficherFeedback(correct,info);
+  document.getElementById('next-btn').className='next-btn show';
+}
+
+function afficherFeedback(correct,info){
+  const el=document.getElementById('feedback');
+  el.textContent=(correct?'✅ Bonne réponse ! ':'❌ Mauvaise réponse. ')+info;
+  el.className='feedback show '+(correct?'correct':'wrong');
+}
+
+function questionSuivante(){qIndex++;afficherQuestion();}
+
+function finTour(){
+  clearInterval(chronoInterval);
+  if(mode==='duo'&&joueurActuel===1){
+    joueurActuel=2;questions=questionsJ2;qIndex=0;score=0;bonnes=0;mauvaises=0;streak=0;maxStreak=0;
+    document.getElementById('joueur-tour-nom').textContent=nomsJoueurs[1];
+    document.getElementById('vs-p1').className='vs-player';
+    document.getElementById('vs-p2').className='vs-player active';
+    setTimeout(()=>afficherQuestion(),500);
+  }else{
+    finJeu();
+  }
+}
+
+function finJeu(){
+  clearInterval(chronoInterval);
+  if(mode==='duo'){
+    const s1=scoresJoueurs[0],s2=scoresJoueurs[1];
+    let emoji,winner;
+    if(s1>s2){emoji='🏆';winner=nomsJoueurs[0]+' gagne !';}
+    else if(s2>s1){emoji='🏆';winner=nomsJoueurs[1]+' gagne !';}
+    else{emoji='🤝';winner='Égalité ! Match nul !';}
+    document.getElementById('duo-emoji').textContent=emoji;
+    document.getElementById('duo-winner').textContent=winner;
+    document.getElementById('duo-p1-score').textContent=s1+'/10';
+    document.getElementById('duo-p2-score').textContent=s2+'/10';
+    document.getElementById('duo-p1-label').textContent=nomsJoueurs[0];
+    document.getElementById('duo-p2-label').textContent=nomsJoueurs[1];
+    if(s1>s2||s2>s1){playSound('win');lancerConfettis();}
+    showScreen('screen-resultat-duo');
+  }else{
+    const pct=Math.round((score/questions.length)*100);
+    let emoji,label;
+    if(pct>=90){emoji='🏆';label='Exceptionnel ! Expert de la CI ! 🇨🇮';playSound('win');lancerConfettis();}
+    else if(pct>=70){emoji='🎉';label='Très bien ! Tu connais ta CI !';playSound('win');lancerConfettis();}
+    else if(pct>=50){emoji='😊';label='Pas mal ! Continue tes révisions...';}
+    else if(pct>=30){emoji='🤔';label='Il faut réviser ta culture ivoirienne !';}
+    else{emoji='😅';label='Courage ! La CI a tellement à découvrir !';}
+    document.getElementById('score-emoji').textContent=emoji;
+    document.getElementById('score-num').textContent=score+'/'+questions.length;
+    document.getElementById('score-label').textContent=label;
+    document.getElementById('res-correct').textContent=bonnes;
+    document.getElementById('res-wrong').textContent=mauvaises;
+    document.getElementById('res-streak').textContent=maxStreak;
+    sauvegarderScore();
+    showScreen('screen-resultat');
+  }
+}
+
+function sauvegarderScore(){
+  const key='quiz_ci_scores_'+niveauActuel;
+  let scores=JSON.parse(localStorage.getItem(key)||'[]');
+  scores.push({nom:nomJoueur,score,total:questions.length,date:new Date().toLocaleDateString('fr-FR')});
+  scores.sort((a,b)=>b.score-a.score);
+  scores=scores.slice(0,20);
+  localStorage.setItem(key,JSON.stringify(scores));
+}
+
+function afficherClassement(niv,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));if(btn)btn.classList.add('active');
+  const scores=JSON.parse(localStorage.getItem('quiz_ci_scores_'+niv)||'[]');
+  const medals=['🥇','🥈','🥉'];const el=document.getElementById('classement-liste');
+  if(!scores.length){el.innerHTML='<p style="text-align:center;color:#aaa;padding:20px;font-size:0.9em">Aucun score. Jouez !</p>';return;}
+  el.innerHTML=scores.slice(0,10).map((s,i)=>'<div class="classement-item"><div class="classement-rank">'+(medals[i]||i+1)+'</div><div class="classement-nom">'+s.nom+'<br><span style="color:#aaa;font-size:0.75em">'+s.date+'</span></div><div class="classement-score">'+s.score+'/'+s.total+'<br><span style="color:#aaa;font-size:0.75em">'+(Math.round(s.score/s.total*100))+'%</span></div></div>').join('');
+}
+
+function partagerWhatsApp(){
+  const pct=Math.round((score/questions.length)*100);
+  const niv={facile:'Facile 😊',moyen:'Moyen 🤔',difficile:'Difficile 🔥'}[niveauActuel];
+  const msg='🇨🇮 *Quiz Côte d\'Ivoire*\n\n👤 '+nomJoueur+'\n🎯 Score : '+score+'/'+questions.length+' ('+pct+'%)\n📊 Niveau : '+niv+'\n✅ '+bonnes+' bonnes | ❌ '+mauvaises+' mauvaises\n🔥 Meilleure série : '+maxStreak+'\n\n🎮 Jouez aussi !';
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+function partagerWhatsAppDuo(){
+  const msg='🇨🇮 *Quiz CI - Mode 2 joueurs* 👥\n\n👤 '+nomsJoueurs[0]+' : '+scoresJoueurs[0]+'/10\n👤 '+nomsJoueurs[1]+' : '+scoresJoueurs[1]+'/10\n\n'+(scoresJoueurs[0]>scoresJoueurs[1]?'🏆 Gagnant : '+nomsJoueurs[0]:scoresJoueurs[1]>scoresJoueurs[0]?'🏆 Gagnant : '+nomsJoueurs[1]:'🤝 Match nul !')+'\n\n🎮 Jouez aussi !';
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+function rejouer(){demarrer(niveauActuel);}
+
+afficherClassement('facile',null);
+</script>
+</body>
+</html>
